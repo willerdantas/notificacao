@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Tipos de Ocorrência{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Cadastro de Tipos de Ocorrência</h2>
+    <p>Gerencie os tipos de ocorrência disponíveis no formulário</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">Novo Tipo de Ocorrência</h3>
+    <form method="POST" action="{{ url_for('main.cadastro_tipos_ocorrencia') }}" data-transition="false">
+      <div class="form-grid tres-colunas">
+        <div class="field">
+          <label for="nome_tipo">Nome do Tipo *</label>
+          <input type="text" id="nome_tipo" name="nome_tipo" required placeholder="Ex: Erro de Medicação">
+        </div>
+        <div class="field">
+          <label for="secao_adicional">Seção adicional do formulário</label>
+          <select id="secao_adicional" name="secao_adicional">
+            <option value="">Nenhuma</option>
+            {% for valor, descricao in secoes_adicionais.items() %}
+              <option value="{{ valor }}">{{ descricao }}</option>
+            {% endfor %}
+          </select>
+          <small style="color:#67757c;">Perguntas extras exibidas quando este tipo de ocorrência é escolhido.</small>
+        </div>
+        <div class="field checkbox-row campo-caixa-alinhada">
+          <input type="checkbox" id="exige_paciente" name="exige_paciente">
+          <label for="exige_paciente" style="font-weight:500;"
+                 title="A notificação deste tipo sempre envolve paciente.">Exige identificação do paciente</label>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Cadastrar Tipo</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Tipos de Ocorrência Cadastrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Seção Adicional</th>
+          <th>Paciente Obrigatório</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tipo in tipos %}
+        <tr>
+          <td>{{ tipo.nome }}</td>
+          <td>{{ secoes_adicionais.get(tipo.secao_adicional, '-') }}</td>
+          <td>{{ 'Sim' if tipo.exige_paciente else 'Não' }}</td>
+          <td>
+            {% if tipo.ativa %}
+              <span class="badge badge-resolvida">Ativo</span>
+            {% else %}
+              <span class="badge badge-pendente">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a href="{{ url_for('main.editar_tipo_ocorrencia', tipo_id=tipo.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Editar</a>
+              <form method="POST" action="{{ url_for('main.alternar_status_tipo_ocorrencia', tipo_id=tipo.id) }}">
+                <button type="submit" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                  {{ 'Inativar' if tipo.ativa else 'Ativar' }}
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Nenhum tipo de ocorrência cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

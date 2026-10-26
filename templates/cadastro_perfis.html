@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Perfis de Acesso{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Perfis de Acesso</h2>
+    <p>Defina quais páginas do menu cada perfil acessa</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">Novo Perfil</h3>
+    <form method="POST" action="{{ url_for('main.cadastro_perfis') }}" data-transition="false">
+      <div class="form-grid duas-colunas">
+        <div class="field">
+          <label for="nome_perfil">Nome do Perfil *</label>
+          <input type="text" id="nome_perfil" name="nome_perfil" maxlength="80" required placeholder="Ex: Gerência de Risco">
+        </div>
+        <div class="field checkbox-row campo-caixa-alinhada">
+          <input type="checkbox" id="acesso_total" name="acesso_total">
+          <label for="acesso_total" style="font-weight:500;"
+                 title="Vê todas as notificações (sem filtro de setor, categoria e tipos) e os dados de quem notificou.">Acesso total aos dados</label>
+        </div>
+        <div class="field full">
+          <label>Páginas do Menu</label>
+          <div class="checkbox-grid">
+            {% for chave, (titulo, icone, endpoint) in telas.items() %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="telas" value="{{ chave }}">
+                <span>{{ icone }} {{ titulo }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">O usuário verá no menu, e poderá abrir, somente as páginas marcadas.</small>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Cadastrar Perfil</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Perfis Cadastrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Perfil</th>
+          <th>Páginas do Menu</th>
+          <th>Acesso Total</th>
+          <th>Usuários</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for perfil in perfis %}
+        <tr>
+          <td>{{ perfil.nome }}{% if perfil.sistema %} <small style="color:#67757c;">(sistema)</small>{% endif %}</td>
+          <td>
+            {% if perfil.sistema %}
+              Todas as páginas
+            {% else %}
+              {% for chave in perfil.lista_telas() %}{{ telas[chave][0] }}{% if not loop.last %}, {% endif %}{% else %}-{% endfor %}
+            {% endif %}
+          </td>
+          <td>{{ 'Sim' if perfil.acesso_total else 'Não' }}</td>
+          <td>{{ perfil.usuarios | selectattr('ativo') | list | length }}</td>
+          <td>
+            {% if perfil.ativo %}
+              <span class="badge badge-resolvida">Ativo</span>
+            {% else %}
+              <span class="badge badge-pendente">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if perfil.sistema %}
+              <small style="color:#67757c;">Perfil do sistema</small>
+            {% else %}
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a href="{{ url_for('main.editar_perfil', perfil_id=perfil.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Editar</a>
+              <form method="POST" action="{{ url_for('main.alternar_status_perfil', perfil_id=perfil.id) }}">
+                <button type="submit" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                  {{ 'Inativar' if perfil.ativo else 'Ativar' }}
+                </button>
+              </form>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Nenhum perfil cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

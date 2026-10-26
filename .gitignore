@@ -1,0 +1,23 @@
+# Senhas e configurações locais (usar .env.example como modelo)
+.env
+instance/
+
+# Bancos locais
+*.db
+*.sqlite3
+
+# Ambientes virtuais (recriar com: pip install -r requirements.txt)
+.venv/
+.venv-linux/
+venv/
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.py[cod]
+
+# Arquivos enviados pelos usuários (fotos das notificações e logos personalizadas)
+static/uploads/
+
+# Sistema operacional
+Thumbs.db
+.DS_Store

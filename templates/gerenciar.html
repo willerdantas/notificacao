@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Notificações{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Gerenciar Notificações</h2>
+    <p>Analise e trate as não conformidades notificadas</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">Notificações Pendentes / Em Análise</h3>
+
+    {% for n in pendentes %}
+    <div style="border:1px solid #e4e9eb; border-radius:10px; padding:18px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <strong>#{{ n.id }} &middot; {{ n.unidade_hospitalar }} / {{ n.setor_notificador }}</strong>
+        <span class="badge badge-{{ 'pendente' if n.status == 'Pendente' else 'em-analise' }}">{{ n.status }}</span>
+      </div>
+      <p style="margin:10px 0; color:#4a575d;">{{ n.descricao }}</p>
+      <p style="margin:0 0 12px; font-size:0.8rem; color:#8a9aa0;">
+        Tipo de notificação: {{ n.tipo_notificacao }} &middot;
+        Local do evento: {{ n.local_evento }} &middot; Categoria: {{ n.categoria_profissional }} &middot; Tipo: {{ n.tipo_ocorrencia }} &middot;
+        Gravidade: {{ n.gravidade }} &middot; Data: {{ n.data_ocorrencia.strftime('%d/%m/%Y') }} &middot; Horário: {{ n.horario_notificacao.strftime('%H:%M') }}
+        &middot; Envolve paciente: {{ 'Sim' if n.envolve_paciente else 'Não' }}{% if n.grau_dano %} ({{ n.grau_dano }}){% endif %}
+        {% if n.paciente_prontuario %} &middot; Paciente: {{ n.paciente_nome or '-' }} (prontuário {{ n.paciente_prontuario }}{% set idade = n.paciente_data_nascimento | idade_em(n.data_ocorrencia) %}{% if idade %}, {{ idade }}{% endif %}){% endif %}
+        {% if n.hemo_tipo_evento %} &middot; Hemotransfusão: {{ n.hemo_tipo_evento }} ({{ n.hemo_hemocomponente }}){% endif %}
+        {% if n.bio_tipo_transplante %} &middot; Biovigilância: transplante de {{ n.bio_tipo_transplante }} ({{ n.bio_tipo_reacao }}){% endif %}
+        {% if n.med_nome %} &middot; Medicamento: {{ n.med_nome }}{% if n.med_incidente %} ({{ n.med_incidente }}){% endif %}{% endif %}
+        {% if n.produto_nome %} &middot; Produto: {{ n.produto_nome }} (lote {{ n.produto_lote }}, {{ n.produto_fabricante }}{% if n.produto_fornecedor %}, fornecedor {{ n.produto_fornecedor }}{% endif %}){% endif %}
+        &middot; Responsável: {{ n.responsavel.nome if n.responsavel else '-' }}
+        &middot; ANVISA: {{ n.status_anvisa or 'Não Notificado' }}
+        &middot; Notivisa: {{ n.numero_notivisa or '-' }}
+        &middot; Vigimed: {{ n.numero_vigimed or '-' }}
+        {% if can_view_notificante and not n.anonimo and n.notificante_nome %} &middot; Notificante: {{ n.notificante_nome }}{% endif %}
+      </p>
+      {% if n.imagem_path %}
+      <div style="margin:0 0 14px;">
+        <a href="{{ url_for('static', filename=n.imagem_path) }}" target="_blank" rel="noopener">
+          <img src="{{ url_for('static', filename=n.imagem_path) }}" alt="Imagem da ocorrência #{{ n.id }}" style="max-width:100%; max-height:320px; border-radius:10px; border:1px solid #dbe3e6; object-fit:contain; background:#f4f6f7;">
+        </a>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('main.gerenciar') }}" class="form-grid">
+        <input type="hidden" name="notification_id" value="{{ n.id }}">
+        <div class="field">
+          <label>Novo Status</label>
+          <select name="status">
+            {% for s in status_options %}
+              <option value="{{ s }}" {% if n.status == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Gravidade</label>
+          <select name="gravidade">
+            {% for g in gravidade_options %}
+              <option value="{{ g }}" {% if n.gravidade == g %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Responsável</label>
+          <select name="responsavel_id">
+            <option value="">Não definido</option>
+            {% for r in responsaveis %}
+              <option value="{{ r.id }}" {% if n.responsavel_id == r.id %}selected{% endif %}>{{ r.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Status da ANVISA</label>
+          <select name="status_anvisa">
+            {% for s in status_anvisa_options %}
+              <option value="{{ s }}" {% if n.status_anvisa == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Número Notivisa</label>
+          <input type="text" name="numero_notivisa" value="{{ n.numero_notivisa or '' }}" placeholder="Informe o número Notivisa">
+        </div>
+        <div class="field">
+          <label>Número Vigimed</label>
+          <input type="text" name="numero_vigimed" value="{{ n.numero_vigimed or '' }}" placeholder="Informe o número Vigimed">
+        </div>
+        <div class="field full">
+          <label>Observação do Tratamento</label>
+          <textarea name="observacao" placeholder="Descreva as ações tomadas...">{{ n.observacao_tratamento or '' }}</textarea>
+        </div>
+        <div class="field full" style="text-align:right;">
+          <a href="{{ url_for('main.visualizar_notificacao', notification_id=n.id) }}" class="btn btn-secondary" style="margin-right:8px;">Visualizar</a>
+          <button type="submit" class="btn btn-primary">Atualizar Notificação</button>
+        </div>
+      </form>
+    </div>
+    {% else %}
+    <p>Nenhuma notificação pendente no momento.</p>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Últimas Resolvidas</h3>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Unidade / Setor Notificador</th><th>Responsável</th><th>Status ANVISA</th><th>Tratado por</th><th>Atualizado em</th><th>Imagem</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for n in resolvidas %}
+        <tr>
+          <td>{{ n.id }}</td>
+          <td>{{ n.unidade_hospitalar }} / {{ n.setor_notificador }}</td>
+          <td>{{ n.responsavel.nome if n.responsavel else '-' }}</td>
+          <td>{{ n.status_anvisa or 'Não Notificado' }}</td>
+          <td>{{ n.tratado_por.full_name if n.tratado_por else '-' }}</td>
+          <td>{{ n.updated_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>
+            {% if n.imagem_path %}
+              <a href="{{ url_for('static', filename=n.imagem_path) }}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">Ver</a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td><a href="{{ url_for('main.visualizar_notificacao', notification_id=n.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Visualizar</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">Nenhuma notificação resolvida ainda.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

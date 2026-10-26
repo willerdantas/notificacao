@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Notificações{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+  if (typeof window.Chart === 'undefined') {
+    const fallbackScript = document.createElement('script');
+    fallbackScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
+    document.head.appendChild(fallbackScript);
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Dashboard de Notificações</h2>
+    <p>Painel de acompanhamento das não conformidades</p>
+  </div>
+</div>
+
+<div class="filters-bar" style="margin-bottom:20px;">
+  <form method="GET" action="{{ url_for('main.dashboard') }}" style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; width:100%;">
+    <div class="field">
+      <label>Responsável</label>
+      <select name="responsavel_id">
+        <option value="">Todos</option>
+        {% for r in responsaveis %}
+          <option value="{{ r.id }}" {% if responsavel_filtro == (r.id|string) %}selected{% endif %}>{{ r.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+  </form>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="label">Total de Notificações</div>
+    <div class="value">{{ total }}</div>
+  </div>
+  <div class="kpi-card alt1">
+    <div class="label">Pendentes</div>
+    <div class="value">{{ pendentes }}</div>
+  </div>
+  <div class="kpi-card alt2">
+    <div class="label">Em Análise</div>
+    <div class="value">{{ em_analise }}</div>
+  </div>
+  <div class="kpi-card alt3">
+    <div class="label">Resolvidas</div>
+    <div class="value">{{ resolvidas }}</div>
+  </div>
+</div>
+
+<div class="container dashboard-container">
+  <div id="dashboardChartError" class="flash flash-warning" style="display:none; margin-bottom:16px;">
+    Não foi possível carregar os gráficos neste momento. Recarregue a página e verifique sua conexão.
+  </div>
+
+  <div class="panel dashboard-panel dashboard-panel-wide">
+    <h3 class="dashboard-title">Notificações por Mês</h3>
+    <div class="chart-wrap chart-wrap-wide">
+      <canvas id="chartMes"></canvas>
+    </div>
+  </div>
+
+  <div class="panel dashboard-panel dashboard-panel-wide">
+    <h3 class="dashboard-title">Notificações por Tipo com Total Mensal</h3>
+    <div class="chart-wrap chart-wrap-tall">
+      <canvas id="chartTipoLinha"></canvas>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="panel dashboard-panel">
+      <h3 class="dashboard-title">Distribuição por Setor Notificador</h3>
+      <div class="chart-wrap chart-wrap-compact">
+        <canvas id="chartSetor"></canvas>
+      </div>
+    </div>
+    <div class="panel dashboard-panel">
+      <h3 class="dashboard-title">Distribuição por Gravidade</h3>
+      <div class="chart-wrap chart-wrap-compact">
+        <canvas id="chartGravidade"></canvas>
+      </div>
+    </div>
+    <div class="panel dashboard-panel">
+      <h3 class="dashboard-title">Notificações por Categoria Profissional</h3>
+      <div class="chart-wrap chart-wrap-medium">
+        <canvas id="chartCategoria"></canvas>
+      </div>
+    </div>
+    <div class="panel dashboard-panel">
+      <h3 class="dashboard-title">Notificações por Tipo</h3>
+      <div class="chart-wrap chart-wrap-medium">
+        <canvas id="chartTipo"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dados = {{ dados|tojson }};
+    const erroEl = document.getElementById('dashboardChartError');
+
+    const renderCharts = () => {
+      if (typeof window.Chart === 'undefined') {
+        return false;
+      }
+
+      const paleta = ['#00A1A2', '#3BB5A3', '#00B2C9', '#007C6B', '#EB600A', '#F3A133', '#2E758C', '#0F9688', '#F7975B', '#53B7D9'];
+
+      new Chart(document.getElementById('chartMes'), {
+        type: 'bar',
+        data: {
+          labels: dados.mes_labels || [],
+          datasets: [{
+            label: 'Notificações',
+            data: dados.mes_values || [],
+            backgroundColor: '#00A1A2'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      new Chart(document.getElementById('chartSetor'), {
+        type: 'doughnut',
+        data: {
+          labels: dados.setor_labels || [],
+          datasets: [{ data: dados.setor_values || [], backgroundColor: paleta }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      new Chart(document.getElementById('chartGravidade'), {
+        type: 'pie',
+        data: {
+          labels: dados.gravidade_labels || [],
+          datasets: [{ data: dados.gravidade_values || [], backgroundColor: ['#53B7D9', '#F7975B', '#EB600A'] }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      new Chart(document.getElementById('chartCategoria'), {
+        type: 'bar',
+        data: {
+          labels: dados.categoria_labels || [],
+          datasets: [{
+            label: 'Notificações',
+            data: dados.categoria_values || [],
+            backgroundColor: '#2E758C'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      new Chart(document.getElementById('chartTipo'), {
+        type: 'bar',
+        data: {
+          labels: dados.tipo_labels || [],
+          datasets: [{
+            label: 'Notificações',
+            data: dados.tipo_values || [],
+            backgroundColor: '#0F9688'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      const datasetsTipoLinha = (dados.tipo_labels || []).map((tipo, index) => ({
+        type: 'bar',
+        label: tipo,
+        data: (dados.tipos_por_mes && dados.tipos_por_mes[tipo]) || [],
+        backgroundColor: paleta[index % paleta.length],
+        stack: 'tipos'
+      }));
+
+      datasetsTipoLinha.push({
+        type: 'line',
+        label: 'Total de Notificações',
+        data: dados.mes_values || [],
+        borderColor: '#38464D',
+        backgroundColor: '#38464D',
+        borderWidth: 3,
+        tension: 0.25,
+        yAxisID: 'y',
+        pointRadius: 4,
+        pointHoverRadius: 5
+      });
+
+      new Chart(document.getElementById('chartTipoLinha'), {
+        data: {
+          labels: dados.mes_labels || [],
+          datasets: datasetsTipoLinha
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              stacked: true
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      return true;
+    };
+
+    let tentativas = 0;
+    const maxTentativas = 15;
+    const espera = setInterval(() => {
+      tentativas += 1;
+      if (renderCharts()) {
+        clearInterval(espera);
+        return;
+      }
+
+      if (tentativas >= maxTentativas) {
+        clearInterval(espera);
+        if (erroEl) {
+          erroEl.style.display = 'block';
+        }
+      }
+    }, 180);
+  });
+</script>
+{% endblock %}
+{% endblock %}

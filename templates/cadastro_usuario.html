@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Usuários{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Cadastro de Usuários</h2>
+    <p>Gerencie os usuários com acesso ao sistema</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">Novo Usuário</h3>
+    <form method="POST" action="{{ url_for('main.cadastro_usuario') }}" data-transition="false">
+      <div class="form-grid">
+        <div class="field">
+          <label for="full_name">Nome Completo *</label>
+          <input type="text" id="full_name" name="full_name" required>
+        </div>
+        <div class="field">
+          <label for="username">Usuário (login) *</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Senha *</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <div class="field">
+          <label for="perfil_id">Perfil de Acesso *</label>
+          <select id="perfil_id" name="perfil_id" required>
+            {% for perfil in perfis %}
+              <option value="{{ perfil.id }}">{{ perfil.nome }}{% if perfil.acesso_total %} (acesso total){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field full">
+          <label>Setores Permitidos *</label>
+          <div class="checkbox-grid">
+            {% for setor in setores %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="setor_ids" value="{{ setor.id }}">
+                <span>{{ setor.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Selecione os setores permitidos para o usuário. Perfis com acesso total enxergam todos os setores.</small>
+        </div>
+        <div class="field full">
+          <label>Categorias Profissionais Permitidas *</label>
+          <div class="checkbox-grid">
+            {% for categoria in categorias_profissionais %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="categoria_ids" value="{{ categoria.id }}">
+                <span>{{ categoria.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Selecione as categorias profissionais das notificações que o usuário pode acessar.</small>
+        </div>
+
+        <div class="field full">
+          <label>Tipos de Ocorrência Permitidos *</label>
+          <div class="checkbox-grid">
+            {% for tipo in tipos_ocorrencia %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="tipo_ocorrencia_ids" value="{{ tipo.id }}">
+                <span>{{ tipo.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Selecione os tipos de ocorrência das notificações que o usuário pode visualizar. Perfis com acesso total enxergam todos.</small>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Cadastrar Usuário</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Usuários Cadastrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Usuário</th>
+          <th>Perfil</th>
+          <th>Setores</th>
+          <th>Categorias</th>
+          <th>Tipos de Ocorrência</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+          <td>{{ usuario.full_name }}</td>
+          <td>{{ usuario.username }}</td>
+          <td>{{ usuario.perfil.nome if usuario.perfil else '-' }}</td>
+          <td>
+            {% if usuario.acesso_total %}
+              Todos os setores
+            {% elif usuario.setores %}
+              {{ usuario.setores | map(attribute='nome') | join(', ') }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if usuario.acesso_total %}
+              Todas as categorias
+            {% elif usuario.categorias_profissionais %}
+              {{ usuario.categorias_profissionais | map(attribute='nome') | join(', ') }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if usuario.acesso_total %}
+              Todos os tipos
+            {% elif usuario.tipos_ocorrencia %}
+              {{ usuario.tipos_ocorrencia | map(attribute='nome') | join(', ') }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if usuario.ativo %}
+              <span class="badge badge-resolvida">Ativo</span>
+            {% else %}
+              <span class="badge badge-pendente">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a href="{{ url_for('main.editar_usuario', user_id=usuario.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Editar</a>
+              <form method="POST" action="{{ url_for('main.alternar_status_usuario', user_id=usuario.id) }}">
+                <button type="submit" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                  {{ 'Desativar' if usuario.ativo else 'Ativar' }}
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">Nenhum usuário cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

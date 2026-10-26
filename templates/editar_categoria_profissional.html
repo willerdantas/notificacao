@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Editar Categoria Profissional{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Editar Categoria Profissional</h2>
+    <p>Atualize o nome da categoria profissional cadastrada</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">{{ categoria.nome }}</h3>
+    <form method="POST" action="{{ url_for('main.editar_categoria_profissional', categoria_id=categoria.id) }}" data-transition="false">
+      <div class="form-grid">
+        <div class="field">
+          <label for="nome_categoria">Nome da Categoria *</label>
+          <input type="text" id="nome_categoria" name="nome_categoria" value="{{ categoria.nome }}" required>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

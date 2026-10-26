@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Setores{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Cadastro de Setores</h2>
+    <p>Gerencie os setores disponíveis para notificações e permissões de usuários</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel" style="margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h3 style="margin:0; color:var(--green-dark);">Setores da t_clinica</h3>
+        <p style="color:#67757c; margin:6px 0 0;">
+          As clínicas ativas (flg_ativo = S) do banco de pacientes são importadas com o próprio isn_clinica como id.
+          A sincronização também ocorre ao iniciar o sistema.
+        </p>
+      </div>
+      <form method="POST" action="{{ url_for('main.sincronizar_setores') }}" data-transition="false">
+        <button type="submit" class="btn btn-secondary">Sincronizar com t_clinica</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">Novo Setor</h3>
+    <p style="color:#67757c; margin-top:0;">Setores cadastrados aqui recebem id a partir de 1001.</p>
+    <form method="POST" action="{{ url_for('main.cadastro_setores') }}" data-transition="false">
+      <div class="form-grid">
+        <div class="field">
+          <label for="nome_setor">Nome do Setor *</label>
+          <input type="text" id="nome_setor" name="nome_setor" required placeholder="Ex: UTI">
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Cadastrar Setor</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Setores Cadastrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Setor</th>
+          <th>Origem</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for setor in setores %}
+        <tr>
+          <td>{{ setor.id }}</td>
+          <td>{{ setor.nome }}</td>
+          <td>{{ 't_clinica' if setor.origem == origem_clinica else 'Manual' }}</td>
+          <td>
+            {% if setor.ativa %}
+              <span class="badge badge-resolvida">Ativo</span>
+            {% else %}
+              <span class="badge badge-pendente">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if setor.origem == origem_clinica %}
+              <small style="color:#67757c;">Mantido pela sincronização</small>
+            {% else %}
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a href="{{ url_for('main.editar_setor', setor_id=setor.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Editar</a>
+              <form method="POST" action="{{ url_for('main.alternar_status_setor', setor_id=setor.id) }}">
+                <button type="submit" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">
+                  {{ 'Inativar' if setor.ativa else 'Ativar' }}
+                </button>
+              </form>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Nenhum setor cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

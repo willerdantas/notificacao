@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Editar Perfil</h2>
+    <p>Atualize o nome e as páginas do menu liberadas para o perfil</p>
+  </div>
+  <div>
+    <a href="{{ url_for('main.cadastro_perfis') }}" class="btn-voltar">Voltar</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">{{ perfil.nome }}</h3>
+    <form method="POST" action="{{ url_for('main.editar_perfil', perfil_id=perfil.id) }}" data-transition="false">
+      <div class="form-grid duas-colunas">
+        <div class="field">
+          <label for="nome_perfil">Nome do Perfil *</label>
+          <input type="text" id="nome_perfil" name="nome_perfil" maxlength="80" value="{{ perfil.nome }}" required>
+        </div>
+        <div class="field checkbox-row campo-caixa-alinhada">
+          <input type="checkbox" id="acesso_total" name="acesso_total" {% if perfil.acesso_total %}checked{% endif %}>
+          <label for="acesso_total" style="font-weight:500;"
+                 title="Vê todas as notificações (sem filtro de setor, categoria e tipos) e os dados de quem notificou.">Acesso total aos dados</label>
+        </div>
+        <div class="field full">
+          <label>Páginas do Menu</label>
+          <div class="checkbox-grid">
+            {% set liberadas = perfil.lista_telas() %}
+            {% for chave, (titulo, icone, endpoint) in telas.items() %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="telas" value="{{ chave }}" {% if chave in liberadas %}checked{% endif %}>
+                <span>{{ icone }} {{ titulo }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">O usuário verá no menu, e poderá abrir, somente as páginas marcadas.</small>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

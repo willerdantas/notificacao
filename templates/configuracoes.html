@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Configurações do Sistema{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Configurações do Sistema</h2>
+    <p>Conexões de banco de dados e identidade visual</p>
+  </div>
+</div>
+
+<div class="container">
+  {% for secao, titulo in secoes_banco.items() %}
+  {% set banco = bancos[secao] %}
+  <div class="panel" style="margin-bottom:24px;">
+    <h3 style="margin-top:0; color:var(--green-dark);">{{ titulo }}</h3>
+    {% if secao == 'banco_notificacoes' %}
+      <p style="color:#67757c; margin-top:0;">
+        Banco PostgreSQL e schema onde são gravadas as informações do sistema de notificações.
+        Ao salvar, o schema e as tabelas são criados no banco informado (se ainda não existirem),
+        junto com os cadastros iniciais, e o sistema passa a usar a nova conexão imediatamente.
+        Como os usuários ficam no banco, será necessário entrar novamente.
+      </p>
+      <p style="color:#67757c; font-size:0.85rem;">
+        Em uso agora: <strong>{{ conexao_em_uso.user }}@{{ conexao_em_uso.host }}:{{ conexao_em_uso.port }}/{{ conexao_em_uso.database }}</strong>
+        &middot; schema <strong>{{ conexao_em_uso.schema }}</strong>
+      </p>
+    {% elif secao == 'banco_pacientes' %}
+      <p style="color:#67757c; margin-top:0;">
+        Banco PostgreSQL onde são consultadas as informações do paciente (nome pelo prontuário e setores da t_clinica).
+        Sem esta configuração, o nome do paciente é digitado no formulário e gravado no banco do sistema.
+      </p>
+    {% elif secao == 'banco_materiais' %}
+      <p style="color:#67757c; margin-top:0;">
+        Banco PostgreSQL onde são consultados os dados de materiais.
+        Sem esta configuração, os dados do produto são digitados no formulário e gravados no banco do sistema.
+      </p>
+    {% endif %}
+    {% if secao in secoes_opcionais %}
+      <p style="font-size:0.85rem; margin-top:0;">
+        {% if bancos_configurados[secao] %}
+          <span class="badge badge-resolvida">Configurado</span>
+        {% else %}
+          <span class="badge badge-pendente">Não configurado</span>
+          <span style="color:#67757c;">&middot; preenchimento manual no formulário</span>
+        {% endif %}
+      </p>
+    {% endif %}
+
+    {% if resultados_teste.get(secao) %}
+      {% set resultado = resultados_teste[secao] %}
+      {% set classe_resultado = {'ok': 'flash-success', 'aviso': 'flash-warning', 'erro': 'flash-danger'} %}
+      <div class="flash {{ classe_resultado[resultado.status] }}">{{ resultado.mensagem }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('main.configuracoes') }}" data-transition="false">
+      <div class="form-grid">
+        <div class="field">
+          <label for="{{ secao }}_host">Endereço (host) *</label>
+          <input type="text" id="{{ secao }}_host" name="{{ secao }}_host" value="{{ banco.host or '' }}" placeholder="ex.: localhost ou 10.0.0.5" required>
+        </div>
+        <div class="field">
+          <label for="{{ secao }}_port">Porta *</label>
+          <input type="text" id="{{ secao }}_port" name="{{ secao }}_port" value="{{ banco.port or '5432' }}" inputmode="numeric" required>
+        </div>
+        <div class="field">
+          <label for="{{ secao }}_database">Banco de dados *</label>
+          <input type="text" id="{{ secao }}_database" name="{{ secao }}_database" value="{{ banco.database or '' }}" required>
+        </div>
+        <div class="field">
+          <label for="{{ secao }}_schema">Schema *</label>
+          <input type="text" id="{{ secao }}_schema" name="{{ secao }}_schema" value="{{ banco.schema or 'public' }}" pattern="[A-Za-z_][A-Za-z0-9_]{0,62}" required>
+        </div>
+        <div class="field">
+          <label for="{{ secao }}_user">Usuário *</label>
+          <input type="text" id="{{ secao }}_user" name="{{ secao }}_user" value="{{ banco.user or '' }}" autocomplete="off" required>
+        </div>
+        <div class="field">
+          <label for="{{ secao }}_password">Senha</label>
+          <input type="password" id="{{ secao }}_password" name="{{ secao }}_password"
+                 value="{{ senhas_digitadas.get(secao, '') }}" autocomplete="new-password"
+                 placeholder="{{ 'Deixe em branco para manter a senha atual' if banco.password else '' }}">
+        </div>
+      </div>
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+        {% if secao in secoes_opcionais and bancos_configurados[secao] %}
+        <button type="submit" name="acao" value="{{ secao }}:remover" class="btn btn-outline" formnovalidate
+                onclick="return confirm('Remover a configuração deste banco? Os dados passarão a ser preenchidos manualmente.');">
+          Remover Configuração
+        </button>
+        {% endif %}
+        <button type="submit" name="acao" value="{{ secao }}:testar" class="btn btn-secondary">Testar Conexão</button>
+        <button type="submit" name="acao" value="{{ secao }}:salvar" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">Logo do Sistema</h3>
+    <p style="color:#67757c; margin-top:0;">Formatos aceitos: PNG, JPG ou WEBP. Prefira PNG com fundo transparente.</p>
+
+    <div class="form-grid">
+      {% for tipo, (titulo, padrao) in tipos_logo.items() %}
+      <div class="field">
+        <label>{{ titulo }}</label>
+        <div style="background:#f4f6f7; border:1px solid #dbe3e6; border-radius:10px; padding:16px; text-align:center;">
+          <img src="{{ url_for('static', filename=logos[tipo]) }}" alt="{{ titulo }}" style="max-width:100%; max-height:120px; object-fit:contain;">
+        </div>
+        <form method="POST" action="{{ url_for('main.configuracoes') }}" enctype="multipart/form-data" data-transition="false"
+              style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+          <input type="file" name="logo_{{ tipo }}" accept=".png,.jpg,.jpeg,.webp,image/*">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" name="acao" value="logo:enviar_{{ tipo }}" class="btn btn-primary">Alterar Logo</button>
+            {% if logos[tipo] != padrao %}
+            <button type="submit" name="acao" value="logo:restaurar_{{ tipo }}" class="btn btn-outline" formnovalidate>Restaurar Padrão</button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

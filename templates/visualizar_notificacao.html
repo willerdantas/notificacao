@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Visualizar Notificação{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Visualizar Notificação</h2>
+    <p>Detalhes completos da não conformidade registrada</p>
+  </div>
+  <div>
+    <button
+      type="button"
+      class="btn-voltar"
+      onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='{{ url_for('main.notificacoes') }}'; }"
+    >Voltar</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px;">
+      <h3 style="margin:0; color:var(--green-dark);">Notificação #{{ notificacao.id }}</h3>
+      <div>
+        {% if notificacao.status == 'Pendente' %}
+          <span class="badge badge-pendente">Pendente</span>
+        {% elif notificacao.status == 'Em Análise' %}
+          <span class="badge badge-em-analise">Em Análise</span>
+        {% else %}
+          <span class="badge badge-resolvida">Resolvida</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-bottom:24px;">
+      <div class="field">
+        <label>Unidade</label>
+        <input type="text" value="{{ notificacao.unidade_hospitalar }}" readonly>
+      </div>
+      <div class="field">
+        <label>Setor Notificador</label>
+        <input type="text" value="{{ notificacao.setor_notificador }}" readonly>
+      </div>
+      <div class="field">
+        <label>Local do Evento</label>
+        <input type="text" value="{{ notificacao.local_evento }}" readonly>
+      </div>
+      <div class="field">
+        <label>Categoria Profissional</label>
+        <input type="text" value="{{ notificacao.categoria_profissional }}" readonly>
+      </div>
+      <div class="field">
+        <label>Tipo de Notificação</label>
+        <input type="text" value="{{ notificacao.tipo_notificacao }}" readonly>
+      </div>
+      <div class="field">
+        <label>Tipo de Ocorrência</label>
+        <input type="text" value="{{ notificacao.tipo_ocorrencia }}" readonly>
+      </div>
+      <div class="field">
+        <label>Gravidade</label>
+        <input type="text" value="{{ notificacao.gravidade }}" readonly>
+      </div>
+      <div class="field">
+        <label>Data da Ocorrência</label>
+        <input type="text" value="{{ notificacao.data_ocorrencia.strftime('%d/%m/%Y') }}" readonly>
+      </div>
+      <div class="field">
+        <label>Horário da Notificação</label>
+        <input type="text" value="{{ notificacao.horario_notificacao.strftime('%H:%M') }}" readonly>
+      </div>
+      <div class="field">
+        <label>Envolve Paciente</label>
+        <input type="text" value="{{ 'Sim' if notificacao.envolve_paciente else 'Não' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Grau do Dano ao Paciente</label>
+        <input type="text" value="{{ notificacao.grau_dano or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Prontuário do Paciente</label>
+        <input type="text" value="{{ notificacao.paciente_prontuario or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Nome do Paciente</label>
+        <input type="text" value="{{ notificacao.paciente_nome or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Data de Nascimento</label>
+        <input type="text" value="{{ notificacao.paciente_data_nascimento.strftime('%d/%m/%Y') if notificacao.paciente_data_nascimento else '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Idade na Data da Ocorrência</label>
+        <input type="text" value="{{ (notificacao.paciente_data_nascimento | idade_em(notificacao.data_ocorrencia)) or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Nome da Mãe</label>
+        <input type="text" value="{{ notificacao.paciente_nome_mae or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>CPF</label>
+        <input type="text" value="{{ (notificacao.paciente_cpf | cpf) or '-' }}" readonly>
+      </div>
+      {% if notificacao.produto_nome %}
+      <fieldset class="field full secao-form secao-produto">
+        <legend>Dados do Produto</legend>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Nome do Produto</label>
+            <input type="text" value="{{ notificacao.produto_nome }}" readonly>
+          </div>
+          <div class="field">
+            <label>Cód. SEPLAG</label>
+            <input type="text" value="{{ notificacao.produto_cod_seplag or '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Nº Registro ANVISA</label>
+            <input type="text" value="{{ notificacao.produto_registro_anvisa or '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Lote</label>
+            <input type="text" value="{{ notificacao.produto_lote }}" readonly>
+          </div>
+          <div class="field">
+            <label>Fabricante</label>
+            <input type="text" value="{{ notificacao.produto_fabricante }}" readonly>
+          </div>
+          <div class="field">
+            <label>Fornecedor</label>
+            <input type="text" value="{{ notificacao.produto_fornecedor or '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Origem dos Dados do Lote</label>
+            <input type="text" value="{{ 'Banco de materiais (lote ' ~ notificacao.produto_lote_estoque_id ~ ')' if notificacao.produto_lote_estoque_id else 'Digitado no formulário' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Data de Fabricação</label>
+            <input type="text" value="{{ notificacao.produto_data_fabricacao.strftime('%d/%m/%Y') if notificacao.produto_data_fabricacao else '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Validade</label>
+            <input type="text" value="{{ notificacao.produto_validade.strftime('%d/%m/%Y') if notificacao.produto_validade else '-' }}" readonly>
+          </div>
+          <div class="field full">
+            <label>Envio de Amostra</label>
+            <input type="text" value="{{ notificacao.envio_amostra or '-' }}" readonly>
+          </div>
+        </div>
+      </fieldset>
+      {% endif %}
+      {% if notificacao.hemo_tipo_evento %}
+      {% set sim_nao = {True: 'Sim', False: 'Não', None: '-'} %}
+      <fieldset class="field full secao-form secao-hemotransfusao">
+        <legend>Dados da Hemotransfusão</legend>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Tipo de Evento Adverso</label>
+            <input type="text" value="{{ notificacao.hemo_tipo_evento }}" readonly>
+          </div>
+          <div class="field">
+            <label>Tipo de Hemocomponente</label>
+            <input type="text" value="{{ notificacao.hemo_hemocomponente or '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Alteração dos sinais vitais durante ou após a transfusão</label>
+            <input type="text" value="{{ sim_nao[notificacao.hemo_alteracao_sinais_vitais] }}" readonly>
+          </div>
+          <div class="field">
+            <label>Manifestações clínicas e laboratoriais</label>
+            <input type="text" value="{{ sim_nao[notificacao.hemo_manifestacoes_clinicas] }}" readonly>
+          </div>
+          <div class="field">
+            <label>Comunicação ao banco de sangue</label>
+            <input type="text" value="{{ sim_nao[notificacao.hemo_comunicacao_banco_sangue] }}" readonly>
+          </div>
+          <div class="field">
+            <label>Bolsa recolhida pelo banco de sangue</label>
+            <input type="text" value="{{ sim_nao[notificacao.hemo_bolsa_recolhida] }}" readonly>
+          </div>
+        </div>
+      </fieldset>
+      {% endif %}
+      {% if notificacao.med_nome %}
+      <fieldset class="field full secao-form secao-medicacao">
+        <legend>Dados da Medicação</legend>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Nome do Medicamento</label>
+            <input type="text" value="{{ notificacao.med_nome }}" readonly>
+          </div>
+          <div class="field">
+            <label>Apresentação</label>
+            <input type="text" value="{{ notificacao.med_apresentacao or '-' }}" readonly>
+          </div>
+          <div class="field">
+            <label>Posologia</label>
+            <input type="text" value="{{ notificacao.med_posologia or '-' }}" readonly>
+          </div>
+          <div class="field full">
+            <label>Incidente Relacionado a Medicamentos (Farmacovigilância)</label>
+            <input type="text" value="{{ notificacao.med_incidente or 'Não se aplica (sem dano ao paciente)' }}" readonly>
+          </div>
+        </div>
+      </fieldset>
+      {% endif %}
+      {% if notificacao.bio_tipo_transplante %}
+      <fieldset class="field full secao-form secao-biovigilancia">
+        <legend>Dados da Biovigilância</legend>
+        <div class="form-grid">
+          <div class="field">
+            <label>Tipo de Transplante</label>
+            <input type="text" value="{{ notificacao.bio_tipo_transplante }}" readonly>
+          </div>
+          <div class="field">
+            <label>Tipo de Reação Adversa</label>
+            <input type="text" value="{{ notificacao.bio_tipo_reacao or '-' }}" readonly>
+          </div>
+        </div>
+      </fieldset>
+      {% endif %}
+      <div class="field full">
+        <label>Descrição</label>
+        <textarea readonly>{{ notificacao.descricao }}</textarea>
+      </div>
+      <div class="field full">
+        <label>Imagem da Ocorrência</label>
+        {% if notificacao.imagem_path %}
+          <a href="{{ url_for('static', filename=notificacao.imagem_path) }}" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename=notificacao.imagem_path) }}" alt="Imagem da ocorrência" style="max-width:100%; max-height:380px; border-radius:10px; border:1px solid #dbe3e6; object-fit:contain; background:#f4f6f7;">
+          </a>
+        {% else %}
+          <input type="text" value="Não enviada" readonly>
+        {% endif %}
+      </div>
+      {% if can_view_notificante %}
+      <div class="field">
+        <label>Notificação Anônima</label>
+        <input type="text" value="{{ 'Sim' if notificacao.anonimo else 'Não' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Notificante</label>
+        <input type="text" value="{{ notificacao.notificante_nome or '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Contato</label>
+        <input type="text" value="{{ notificacao.notificante_contato or '-' }}" readonly>
+      </div>
+      {% else %}
+      <div class="field full">
+        <label>Dados do Notificante</label>
+        <input type="text" value="Informações restritas ao perfil administrador" readonly>
+      </div>
+      {% endif %}
+      <div class="field full">
+        <label>Observação do Tratamento</label>
+        <textarea readonly>{{ notificacao.observacao_tratamento or '-' }}</textarea>
+      </div>
+      <div class="field">
+        <label>Tratado por</label>
+        <input type="text" value="{{ notificacao.tratado_por.full_name if notificacao.tratado_por else '-' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Criada em</label>
+        <input type="text" value="{{ notificacao.created_at.strftime('%d/%m/%Y %H:%M') }}" readonly>
+      </div>
+      <div class="field">
+        <label>Atualizada em</label>
+        <input type="text" value="{{ notificacao.updated_at.strftime('%d/%m/%Y %H:%M') }}" readonly>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

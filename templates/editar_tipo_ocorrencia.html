@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Editar Tipo de Ocorrência{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Editar Tipo de Ocorrência</h2>
+    <p>Atualize o nome do tipo de ocorrência cadastrado</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">{{ tipo.nome }}</h3>
+    <form method="POST" action="{{ url_for('main.editar_tipo_ocorrencia', tipo_id=tipo.id) }}" data-transition="false">
+      <div class="form-grid tres-colunas">
+        <div class="field">
+          <label for="nome_tipo">Nome do Tipo *</label>
+          <input type="text" id="nome_tipo" name="nome_tipo" value="{{ tipo.nome }}" required>
+        </div>
+        <div class="field">
+          <label for="secao_adicional">Seção adicional do formulário</label>
+          <select id="secao_adicional" name="secao_adicional">
+            <option value="">Nenhuma</option>
+            {% for valor, descricao in secoes_adicionais.items() %}
+              <option value="{{ valor }}" {% if tipo.secao_adicional == valor %}selected{% endif %}>{{ descricao }}</option>
+            {% endfor %}
+          </select>
+          <small style="color:#67757c;">Perguntas extras exibidas quando este tipo de ocorrência é escolhido.</small>
+        </div>
+        <div class="field checkbox-row campo-caixa-alinhada">
+          <input type="checkbox" id="exige_paciente" name="exige_paciente" {% if tipo.exige_paciente %}checked{% endif %}>
+          <label for="exige_paciente" style="font-weight:500;"
+                 title="A notificação deste tipo sempre envolve paciente.">Exige identificação do paciente</label>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

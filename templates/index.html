@@ -1,0 +1,985 @@
+{% extends "base.html" %}
+{% block title %}Notificar Não Conformidade{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1 class="hero-titulo">
+    NOTIFICAÇÃO DE NÃO CONFORMIDADE
+    <button type="button" class="info-btn" aria-haspopup="dialog" aria-controls="info-tipos-notificacao"
+            title="O que notificar" aria-label="Informações sobre os tipos de notificação"
+            onclick="document.getElementById('info-tipos-notificacao').showModal()">i</button>
+  </h1>
+</div>
+
+<dialog id="info-tipos-notificacao" class="info-dialog" aria-labelledby="info-tipos-titulo">
+  <div class="info-dialog-header">
+    <h2 id="info-tipos-titulo">Tipos de Notificação</h2>
+    <button type="button" class="info-dialog-fechar" aria-label="Fechar"
+            onclick="document.getElementById('info-tipos-notificacao').close()">&times;</button>
+  </div>
+  <div class="info-dialog-body">
+    <section class="info-tipo">
+      <h3>Núcleo de Segurança do Paciente</h3>
+      <p>Notificar os incidentes relacionados à assistência à saúde que podem resultar em dano desnecessário para o paciente ou eventos adversos que resultaram em dano leve, moderado, grave ou óbito do paciente.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Gerência de Risco – Tecnovigilância</h3>
+      <p>Foca na segurança de produtos para saúde, como equipamentos, materiais descartáveis e implantes.</p>
+      <p><strong>O que notificar:</strong> Materiais de Consumo e Descartáveis, Sondas, Dispositivos de Acesso e Infusão, Curativos e Fixação, Equipamentos Médicos, Materiais de Implante e Órteses/Próteses, entre outros.</p>
+      <p><strong>Por que notificar:</strong> Previne que outros profissionais utilizem lotes com desvios de qualidade, mitigando riscos assistenciais e fornecendo subsídios para que a ANVISA adote medidas regulatórias diante de suspeitas de queixa técnica.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Gerência de Risco – Hemovigilância</h3>
+      <p>Monitora todo o ciclo do sangue, desde a triagem até a conclusão da transfusão.</p>
+      <p><strong>O que notificar:</strong> Reações transfusionais imediatas no paciente (febre, calafrios, falta de ar), incidentes no processo (troca de bolsas, falhas de identificação) ou desvios na conservação do sangue.</p>
+      <p><strong>Por que notificar:</strong> Fortalece a segurança transfusional, permitindo o rastreio de riscos e a melhoria dos protocolos para garantir a integridade de quem recebe a transfusão.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Gerência de Risco – Farmacovigilância</h3>
+      <p>Monitora a segurança dos medicamentos e vacinas após serem colocados no mercado.</p>
+      <p><strong>O que notificar:</strong> Reações adversas a medicamentos (alergias graves, tremores etc.), suspeita de medicamentos falsificados, ou quando o remédio simplesmente não faz o efeito esperado (ineficiência terapêutica).</p>
+      <p><strong>Por que notificar:</strong> Ajuda a identificar efeitos colaterais raros que só aparecem quando milhares de pessoas usam o remédio, podendo levar à alteração de bulas ou retirada do produto do mercado.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Não Conformidade</h3>
+      <p>É quando uma norma não é cumprida ou não é executada corretamente.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Biovigilância</h3>
+      <p>Eventos adversos relacionados ao uso terapêutico de células, tecidos, órgãos e produtos de origem humana, visando a segurança do doador e do receptor.</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Vigilância de Saneantes</h3>
+      <p>Eventos adversos associados ao uso de saneantes (desinfetantes, detergentes, esterilizantes).</p>
+    </section>
+
+    <section class="info-tipo">
+      <h3>Nutrivigilância</h3>
+      <p>Eventos adversos e riscos relacionados a alimentos e produtos para fins nutricionais.</p>
+    </section>
+  </div>
+</dialog>
+
+<div class="container index-container">
+  <div class="panel">
+    <p style="color:#67757c; margin-top:0;">
+      Utilize o formulário abaixo para relatar qualquer não conformidade, incidente ou
+      evento adverso identificado no hospital. Sua notificação é fundamental para a
+      melhoria contínua da segurança do paciente.
+    </p>
+
+    <form method="POST" action="{{ url_for('main.index') }}" data-transition="true" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="field">
+          <label for="setor_notificador">Setor Notificador *</label>
+          <select id="setor_notificador" name="setor_notificador" required>
+            <option value="" disabled selected>Selecione o setor notificador</option>
+            {% for setor in setores %}
+              <option value="{{ setor }}">{{ setor }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="local_evento">Local do Evento *</label>
+          <select id="local_evento" name="local_evento" required>
+            <option value="" disabled selected>Selecione o local do evento</option>
+            {% for setor in setores %}
+              <option value="{{ setor }}">{{ setor }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="categoria_profissional">Categoria Profissional *</label>
+          <select id="categoria_profissional" name="categoria_profissional" required>
+            <option value="" disabled selected>Selecione a categoria</option>
+            {% for categoria in categorias_profissionais %}
+              <option value="{{ categoria }}">{{ categoria }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="data_ocorrencia">Data da Ocorrência *</label>
+          <input type="date" id="data_ocorrencia" name="data_ocorrencia" required>
+        </div>
+
+        <div class="field">
+          <label for="horario_notificacao">Horário da Notificação *</label>
+          <input type="time" id="horario_notificacao" name="horario_notificacao" required>
+        </div>
+
+        <div class="field">
+          <label for="tipo_ocorrencia">Tipo de Ocorrência *</label>
+          <select id="tipo_ocorrencia" name="tipo_ocorrencia" required onchange="toggleDadosProduto(); toggleDadosHemotransfusao(); toggleDadosMedicacao(); toggleDadosBiovigilancia(); exigirPacienteSeNecessario();">
+            <option value="" disabled selected>Selecione o tipo</option>
+            {% for tipo in tipos %}
+              <option value="{{ tipo }}">{{ tipo }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <fieldset class="field full secao-form secao-produto" id="secao-produto" hidden>
+          <legend id="secao-produto-titulo">Dados do Produto</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="produto_lote">Lote <span class="marca-lote-registro">*</span></label>
+              <input type="text" id="produto_lote" name="produto_lote" maxlength="100" autocomplete="off"
+                     {% if consulta_materiais_configurada %}placeholder="Digite o lote para buscar o produto"{% endif %}>
+              <small id="produto_lote_status" style="color:#67757c;" aria-live="polite"></small>
+              <input type="hidden" id="produto_lote_estoque_id" name="produto_lote_estoque_id">
+            </div>
+            <div class="field full" id="campo-lote-resultados" hidden>
+              <label for="produto_lote_resultado">Produto deste lote *</label>
+              <select id="produto_lote_resultado"></select>
+              <small style="color:#67757c;">O mesmo lote está cadastrado para mais de um produto, fornecedor ou validade.</small>
+            </div>
+            <div class="field full">
+              <label for="produto_nome">Nome do Produto *</label>
+              <input type="text" id="produto_nome" name="produto_nome" maxlength="255" class="dado-estoque"
+                     autocomplete="off"
+                     {% if consulta_materiais_configurada %}list="produto_nome_sugestoes" placeholder="Digite ao menos 3 letras para buscar o produto"{% endif %}>
+              <datalist id="produto_nome_sugestoes"></datalist>
+              <input type="hidden" id="produto_estoque_id" name="produto_estoque_id">
+            </div>
+            <div class="field">
+              <label for="produto_fornecedor">Fornecedor</label>
+              <input type="text" id="produto_fornecedor" name="produto_fornecedor" maxlength="255" class="dado-estoque">
+            </div>
+            <div class="field">
+              <label for="produto_fabricante">Fabricante *</label>
+              <input type="text" id="produto_fabricante" name="produto_fabricante" maxlength="255">
+            </div>
+            <div class="field">
+              <label for="produto_cod_seplag">Cód. SEPLAG</label>
+              <input type="text" id="produto_cod_seplag" name="produto_cod_seplag" maxlength="50" class="dado-estoque">
+            </div>
+            <div class="field">
+              <label for="produto_registro_anvisa">Nº Registro ANVISA <span class="marca-lote-registro">*</span></label>
+              <input type="text" id="produto_registro_anvisa" name="produto_registro_anvisa" maxlength="50">
+            </div>
+            <div class="field">
+              <label for="produto_data_fabricacao">Data de Fabricação *</label>
+              <input type="date" id="produto_data_fabricacao" name="produto_data_fabricacao">
+            </div>
+            <div class="field">
+              <label for="produto_validade">Validade</label>
+              <input type="date" id="produto_validade" name="produto_validade" class="dado-estoque">
+            </div>
+            <div class="field full" role="group" aria-labelledby="envio-amostra-titulo">
+              <label id="envio-amostra-titulo">Envio de amostra * <small style="font-weight:400; color:#67757c;">(marque uma ou mais)</small></label>
+              {% for opcao in envio_amostra_options %}
+              <div class="checkbox-row">
+                <input type="checkbox" id="envio_amostra_{{ loop.index }}" name="envio_amostra" value="{{ opcao }}">
+                <label for="envio_amostra_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+              </div>
+              {% endfor %}
+              <small id="envio_amostra_erro" style="color:#c0392b;" aria-live="polite"></small>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="field full secao-form secao-hemotransfusao" id="secao-hemotransfusao" hidden>
+          <legend>Dados da Hemotransfusão</legend>
+          <div class="form-grid">
+            <div class="field full" role="radiogroup" aria-labelledby="hemo-tipo-evento-titulo">
+              <label id="hemo-tipo-evento-titulo">Tipo de Evento Adverso *</label>
+              {% for opcao in hemo_tipo_evento_options %}
+              <div class="checkbox-row">
+                <input type="radio" id="hemo_tipo_evento_{{ loop.index }}" name="hemo_tipo_evento" value="{{ opcao }}" class="campo-hemo">
+                <label for="hemo_tipo_evento_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="field full" role="group" aria-labelledby="hemo-hemocomponente-titulo">
+              <label id="hemo-hemocomponente-titulo">Tipo de Hemocomponente * <small style="font-weight:400; color:#67757c;">(marque um ou mais)</small></label>
+              <div class="checkbox-row" style="flex-wrap:wrap; gap:8px 22px;">
+                {% for opcao in hemocomponente_options %}
+                <span class="checkbox-row">
+                  <input type="checkbox" id="hemo_hemocomponente_{{ loop.index }}" name="hemo_hemocomponente" value="{{ opcao }}">
+                  <label for="hemo_hemocomponente_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+                </span>
+                {% endfor %}
+              </div>
+              <small id="hemo_hemocomponente_erro" style="color:#c0392b;" aria-live="polite"></small>
+            </div>
+
+            {% for campo, pergunta in hemo_perguntas_sim_nao %}
+            <div class="field" role="radiogroup" aria-labelledby="{{ campo }}_titulo">
+              <label id="{{ campo }}_titulo">{{ pergunta }} *</label>
+              <div class="checkbox-row">
+                <input type="radio" id="{{ campo }}_sim" name="{{ campo }}" value="sim" class="campo-hemo">
+                <label for="{{ campo }}_sim" style="font-weight:500;">Sim</label>
+                <input type="radio" id="{{ campo }}_nao" name="{{ campo }}" value="nao" class="campo-hemo" style="margin-left:18px;">
+                <label for="{{ campo }}_nao" style="font-weight:500;">Não</label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <fieldset class="field full secao-form secao-medicacao" id="secao-medicacao" hidden>
+          <legend>Dados da Medicação</legend>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="med_nome">Nome do Medicamento *</label>
+              <input type="text" id="med_nome" name="med_nome" maxlength="255" class="campo-med">
+            </div>
+            <div class="field">
+              <label for="med_apresentacao">Apresentação *</label>
+              <input type="text" id="med_apresentacao" name="med_apresentacao" maxlength="255" class="campo-med"
+                     placeholder="Ex.: comprimido 500 mg, ampola 10 mL">
+            </div>
+            <div class="field">
+              <label for="med_posologia">Posologia *</label>
+              <input type="text" id="med_posologia" name="med_posologia" maxlength="255" class="campo-med"
+                     placeholder="Ex.: 1 comprimido de 8/8h">
+            </div>
+            <div class="field full" id="campo-med-incidente" role="radiogroup" aria-labelledby="med-incidente-titulo" hidden>
+              <label id="med-incidente-titulo">Incidentes relacionados a medicamentos (Farmacovigilância) *</label>
+              {% for opcao in med_incidente_options %}
+              <div class="checkbox-row">
+                <input type="radio" id="med_incidente_{{ loop.index }}" name="med_incidente" value="{{ opcao }}">
+                <label for="med_incidente_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="field full secao-form secao-biovigilancia" id="secao-biovigilancia" hidden>
+          <legend>Dados da Biovigilância</legend>
+          <div class="form-grid">
+            <div class="field full" role="radiogroup" aria-labelledby="bio-transplante-titulo">
+              <label id="bio-transplante-titulo">Tipo de Transplante *</label>
+              <div class="checkbox-row" style="flex-wrap:wrap; gap:8px 22px;">
+                {% for opcao in bio_tipo_transplante_options %}
+                <span class="checkbox-row">
+                  <input type="radio" id="bio_tipo_transplante_{{ loop.index }}" name="bio_tipo_transplante" value="{{ opcao }}" class="campo-bio">
+                  <label for="bio_tipo_transplante_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+                </span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="field full" role="radiogroup" aria-labelledby="bio-reacao-titulo">
+              <label id="bio-reacao-titulo">Tipo de Reação Adversa *</label>
+              {% for opcao in bio_tipo_reacao_options %}
+              <div class="checkbox-row">
+                <input type="radio" id="bio_tipo_reacao_{{ loop.index }}" name="bio_tipo_reacao" value="{{ opcao }}" class="campo-bio">
+                <label for="bio_tipo_reacao_{{ loop.index }}" style="font-weight:500;">{{ opcao }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="field full">
+          <label>A notificação envolve paciente? *</label>
+          <div class="checkbox-row">
+            <input type="radio" id="envolve_paciente_sim" name="envolve_paciente" value="sim" required onchange="toggleGrauDano()">
+            <label for="envolve_paciente_sim" style="font-weight:500;">Sim</label>
+            <input type="radio" id="envolve_paciente_nao" name="envolve_paciente" value="nao" required onchange="toggleGrauDano()" style="margin-left:18px;">
+            <label for="envolve_paciente_nao" style="font-weight:500;">Não</label>
+          </div>
+          <small id="aviso-paciente-obrigatorio" style="color:#67757c;" hidden>
+            Obrigatório para este tipo de ocorrência: informe os dados do paciente.
+          </small>
+        </div>
+
+        <fieldset class="field full secao-form secao-paciente" id="secao-paciente" hidden>
+          <legend>Dados do Paciente</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="paciente_prontuario">Prontuário do Paciente *</label>
+              <input type="text" id="paciente_prontuario" name="paciente_prontuario" maxlength="20"
+                     inputmode="numeric" pattern="[0-9]+" autocomplete="off" placeholder="Somente números">
+              <small id="paciente_status" style="color:#67757c;" aria-live="polite"></small>
+            </div>
+
+            <div class="field inicio-linha">
+              <label for="paciente_nome">Nome do Paciente{% if not consulta_pacientes_configurada %} *{% endif %}</label>
+              <input type="text" id="paciente_nome" name="paciente_nome" maxlength="500" class="dado-paciente"
+                     {% if consulta_pacientes_configurada %}readonly tabindex="-1" placeholder="Preenchido automaticamente pelo prontuário"{% else %}placeholder="Digite o nome do paciente"{% endif %}>
+            </div>
+
+            <div class="field">
+              <label for="paciente_nome_mae">Nome da Mãe</label>
+              <input type="text" id="paciente_nome_mae" name="paciente_nome_mae" maxlength="500" class="dado-paciente"
+                     {% if consulta_pacientes_configurada %}readonly tabindex="-1"{% endif %}>
+            </div>
+
+            <div class="field terco">
+              <label for="paciente_data_nascimento">Data de Nascimento</label>
+              <input type="date" id="paciente_data_nascimento" name="paciente_data_nascimento" class="dado-paciente"
+                     {% if consulta_pacientes_configurada %}readonly tabindex="-1"{% endif %}>
+            </div>
+
+            <div class="field terco">
+              <label for="paciente_idade">Idade</label>
+              <input type="text" id="paciente_idade" readonly tabindex="-1" placeholder="Calculada pela data de nascimento">
+              <small style="color:#67757c;">Na data da ocorrência.</small>
+            </div>
+
+            <div class="field terco">
+              <label for="paciente_cpf">CPF</label>
+              <input type="text" id="paciente_cpf" name="paciente_cpf" maxlength="14" inputmode="numeric" class="dado-paciente"
+                     autocomplete="off" placeholder="000.000.000-00"
+                     {% if consulta_pacientes_configurada %}readonly tabindex="-1"{% endif %}>
+            </div>
+
+            <div class="field full" id="campo-grau-dano">
+              <label>Qual o grau do dano causado ao paciente? *</label>
+              {% for valor, descricao_grau in grau_dano_options %}
+              <div class="checkbox-row">
+                <input type="radio" id="grau_dano_{{ loop.index }}" name="grau_dano" value="{{ valor }}">
+                <label for="grau_dano_{{ loop.index }}" style="font-weight:500;">{{ descricao_grau }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="field full">
+          <label for="descricao">Descrição da Não Conformidade *</label>
+          <textarea id="descricao" name="descricao" required minlength="100"
+                    placeholder="Descreva detalhadamente o que aconteceu..."></textarea>
+          <small style="color:#67757c;">Mínimo de 100 caracteres.</small>
+        </div>
+
+        <div class="field full">
+          <label for="imagem_notificacao">Imagem da Ocorrência</label>
+          <input type="file" id="imagem_notificacao" name="imagem_notificacao" accept=".jpg,.jpeg,.png,.webp,image/*">
+        </div>
+
+        <div class="field full checkbox-row">
+          <input type="checkbox" id="anonimo" name="anonimo" onclick="toggleIdentificacao()">
+          <label for="anonimo" style="font-weight:500;">Desejo notificar de forma anônima</label>
+        </div>
+
+        <div class="field" id="campo-nome">
+          <label for="notificante_nome">Nome do Notificante *</label>
+          <input type="text" id="notificante_nome" name="notificante_nome" placeholder="Obrigatório quando não for anônimo">
+        </div>
+
+        <div class="field" id="campo-telefone">
+          <label for="notificante_telefone">Telefone / Celular *</label>
+          <input type="tel" id="notificante_telefone" name="notificante_telefone"
+                 placeholder="Somente números (máx. 11 dígitos)"
+                 maxlength="11" inputmode="numeric" pattern="[0-9]{10,11}">
+          <small style="color:#67757c;">Somente números, 10 ou 11 dígitos.</small>
+        </div>
+
+        <div class="field" id="campo-email">
+          <label for="notificante_email">E-mail *</label>
+          <input type="email" id="notificante_email" name="notificante_email" placeholder="Obrigatório quando não for anônimo">
+        </div>
+      </div>
+
+      <div style="margin-top:26px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Enviar Notificação</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="footnote footnote-text">Desenvolvido por NUTIC/HCASG - 2026</footer>
+
+<script>
+  function toggleIdentificacao() {
+    const anonimo = document.getElementById('anonimo').checked;
+    const nome = document.getElementById('notificante_nome');
+    const telefone = document.getElementById('notificante_telefone');
+    const email = document.getElementById('notificante_email');
+
+    document.getElementById('campo-nome').style.display = anonimo ? 'none' : 'flex';
+    document.getElementById('campo-telefone').style.display = anonimo ? 'none' : 'flex';
+    document.getElementById('campo-email').style.display = anonimo ? 'none' : 'flex';
+
+    nome.required = !anonimo;
+    telefone.required = !anonimo;
+    email.required = !anonimo;
+
+    if (anonimo) {
+      nome.value = '';
+      telefone.value = '';
+      email.value = '';
+    }
+  }
+
+  function toggleGrauDano() {
+    const envolvePaciente = document.getElementById('envolve_paciente_sim').checked;
+    const opcoesGrau = document.querySelectorAll('input[name="grau_dano"]');
+    const prontuario = document.getElementById('paciente_prontuario');
+    const nomePaciente = document.getElementById('paciente_nome');
+
+    document.getElementById('secao-paciente').hidden = !envolvePaciente;
+
+    opcoesGrau.forEach(function (opcao) {
+      opcao.required = envolvePaciente;
+      if (!envolvePaciente) {
+        opcao.checked = false;
+      }
+    });
+
+    prontuario.required = envolvePaciente;
+    // Sem banco de pacientes, o nome é digitado (e gravado no banco do sistema).
+    nomePaciente.required = envolvePaciente && !nomePaciente.readOnly;
+    if (!envolvePaciente) {
+      prontuario.value = '';
+      limparDadosPaciente();
+      definirStatusPaciente('', '');
+    }
+    // O grau do dano pode ter sido limpo acima; a pergunta de incidente da medicação depende dele.
+    atualizarIncidenteMedicacao();
+  }
+
+  function limparDadosPaciente() {
+    document.querySelectorAll('.dado-paciente').forEach(function (campo) { campo.value = ''; });
+    atualizarIdade();
+  }
+
+  // Banco de pacientes configurado mas fora do ar: libera a digitação dos dados do paciente.
+  function liberarDadosManual() {
+    document.querySelectorAll('.dado-paciente').forEach(function (campo) {
+      campo.readOnly = false;
+      campo.tabIndex = 0;
+    });
+    const nomePaciente = document.getElementById('paciente_nome');
+    nomePaciente.required = true;
+    nomePaciente.placeholder = 'Digite o nome do paciente';
+  }
+
+  // Idade na data da ocorrência (ou hoje, se a data ainda não foi informada); mesma regra do servidor.
+  function calcularIdade(nascimentoIso, referenciaIso) {
+    if (!nascimentoIso) {
+      return '';
+    }
+    const nasc = new Date(nascimentoIso + 'T00:00:00');
+    const ref = referenciaIso ? new Date(referenciaIso + 'T00:00:00') : new Date();
+    if (isNaN(nasc) || isNaN(ref) || nasc > ref) {
+      return '';
+    }
+    const antesDoAniversario = ref.getMonth() < nasc.getMonth()
+      || (ref.getMonth() === nasc.getMonth() && ref.getDate() < nasc.getDate());
+    const anos = ref.getFullYear() - nasc.getFullYear() - (antesDoAniversario ? 1 : 0);
+    if (anos >= 1) {
+      return anos + (anos === 1 ? ' ano' : ' anos');
+    }
+    const meses = (ref.getFullYear() - nasc.getFullYear()) * 12 + ref.getMonth() - nasc.getMonth()
+      - (ref.getDate() < nasc.getDate() ? 1 : 0);
+    if (meses >= 1) {
+      return meses + (meses === 1 ? ' mês' : ' meses');
+    }
+    const dias = Math.round((ref - nasc) / 86400000);
+    return dias + (dias === 1 ? ' dia' : ' dias');
+  }
+
+  function atualizarIdade() {
+    document.getElementById('paciente_idade').value = calcularIdade(
+      document.getElementById('paciente_data_nascimento').value,
+      document.getElementById('data_ocorrencia').value
+    );
+  }
+
+  document.getElementById('paciente_data_nascimento').addEventListener('change', atualizarIdade);
+  document.getElementById('data_ocorrencia').addEventListener('change', atualizarIdade);
+  document.getElementById('paciente_data_nascimento').max = new Date().toISOString().slice(0, 10);
+
+  // CPF digitado: formata 000.000.000-00 enquanto digita.
+  document.getElementById('paciente_cpf').addEventListener('input', function () {
+    if (this.readOnly) {
+      return;
+    }
+    const d = this.value.replace(/\D/g, '').slice(0, 11);
+    this.value = d.length > 9 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4')
+      : d.length > 6 ? d.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3')
+      : d.length > 3 ? d.replace(/(\d{3})(\d{1,3})/, '$1.$2')
+      : d;
+  });
+
+  // Busca o nome do paciente (t_paciente) pelo número do prontuário.
+  const URL_BUSCA_PACIENTE = '{{ url_for("main.buscar_paciente_nome") }}';
+  let statusPaciente = '';
+  let buscaPacienteTimer = null;
+  let buscaPacienteControle = null;
+
+  function definirStatusPaciente(status, mensagem, cor) {
+    statusPaciente = status;
+    const aviso = document.getElementById('paciente_status');
+    aviso.textContent = mensagem;
+    aviso.style.color = cor || '#67757c';
+  }
+
+  function buscarNomePaciente() {
+    const campo = document.getElementById('paciente_prontuario');
+    const valor = campo.value.trim();
+
+    limparDadosPaciente();
+    if (buscaPacienteControle) {
+      buscaPacienteControle.abort();
+    }
+    if (!valor) {
+      definirStatusPaciente('', '');
+      return;
+    }
+
+    definirStatusPaciente('buscando', 'Buscando paciente...');
+    buscaPacienteControle = new AbortController();
+    fetch(URL_BUSCA_PACIENTE + '?prontuario=' + encodeURIComponent(valor), { signal: buscaPacienteControle.signal })
+      .then(function (resposta) { return resposta.json(); })
+      .then(function (dados) {
+        if (dados.status === 'encontrado') {
+          document.getElementById('paciente_nome').value = dados.nome;
+          document.getElementById('paciente_data_nascimento').value = dados.data_nascimento;
+          document.getElementById('paciente_nome_mae').value = dados.nome_mae;
+          document.getElementById('paciente_cpf').value = dados.cpf_mascarado;
+          atualizarIdade();
+          definirStatusPaciente('encontrado', '');
+        } else if (dados.status === 'indisponivel') {
+          definirStatusPaciente('indisponivel', 'Consulta de pacientes indisponível. Digite os dados do paciente.', '#b26b00');
+          liberarDadosManual();
+        } else {
+          definirStatusPaciente(dados.status, dados.mensagem, '#c0392b');
+        }
+      })
+      .catch(function (erro) {
+        if (erro.name !== 'AbortError') {
+          definirStatusPaciente('indisponivel', 'Não foi possível consultar o paciente agora. Digite os dados do paciente.', '#b26b00');
+          liberarDadosManual();
+        }
+      });
+  }
+
+  const CONSULTA_PACIENTES_CONFIGURADA = {{ consulta_pacientes_configurada | tojson }};
+
+  document.getElementById('paciente_prontuario').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 20);
+    if (!CONSULTA_PACIENTES_CONFIGURADA || !document.getElementById('paciente_nome').readOnly) {
+      return;  // nome digitado manualmente: não há busca
+    }
+    clearTimeout(buscaPacienteTimer);
+    buscaPacienteTimer = setTimeout(buscarNomePaciente, 700);
+  });
+
+  document.querySelector('form[action="{{ url_for('main.index') }}"]').addEventListener('submit', function (evento) {
+    if (!document.getElementById('envolve_paciente_sim').checked) {
+      return;
+    }
+    if (statusPaciente === 'buscando') {
+      evento.preventDefault();
+      definirStatusPaciente('buscando', 'Aguarde a busca do paciente terminar.', '#b26b00');
+    } else if (statusPaciente === 'nao_encontrado' || statusPaciente === 'invalido' || statusPaciente === 'limite') {
+      evento.preventDefault();
+      document.getElementById('paciente_prontuario').focus();
+    }
+  });
+
+  // Seção de dados do produto: aparece para os tipos de ocorrência que exigem (ex.: material médico-hospitalar).
+  // Saneantes usam o mesmo quadro, com lote e registro ANVISA opcionais.
+  const TIPOS_COM_PRODUTO = {{ tipos_com_produto | tojson }};
+  const TIPOS_COM_SANEANTES = {{ tipos_com_saneantes | tojson }};
+  const CAMPOS_PRODUTO_OBRIGATORIOS = ['produto_nome', 'produto_fabricante', 'produto_data_fabricacao'];
+  const CAMPOS_LOTE_REGISTRO = ['produto_lote', 'produto_registro_anvisa'];
+
+  function toggleDadosProduto() {
+    const secao = document.getElementById('secao-produto');
+    const tipo = document.getElementById('tipo_ocorrencia').value;
+    const produtoCompleto = TIPOS_COM_PRODUTO.includes(tipo);
+    const saneante = TIPOS_COM_SANEANTES.includes(tipo);
+    const exige = produtoCompleto || saneante;
+
+    secao.hidden = !exige;
+    document.getElementById('secao-produto-titulo').textContent = saneante ? 'Vigilância de Saneantes' : 'Dados do Produto';
+    CAMPOS_PRODUTO_OBRIGATORIOS.forEach(function (id) {
+      document.getElementById(id).required = exige;
+    });
+    CAMPOS_LOTE_REGISTRO.forEach(function (id) {
+      document.getElementById(id).required = produtoCompleto;
+    });
+    document.querySelectorAll('.marca-lote-registro').forEach(function (marca) {
+      marca.hidden = !produtoCompleto;
+    });
+    if (!exige) {
+      limparSugestoesProduto();
+      liberarDadosEstoque();
+      ocultarResultadosLote();
+      definirStatusLote('', '');
+      secao.querySelectorAll('input').forEach(function (campo) {
+        if (campo.type === 'checkbox') {
+          campo.checked = false;
+        } else {
+          campo.value = '';
+        }
+      });
+      document.getElementById('envio_amostra_erro').textContent = '';
+    }
+  }
+
+  // Seção de hemotransfusão: aparece para os tipos de ocorrência ligados a ela (ex.: Hemotransfusão).
+  const TIPOS_COM_HEMOTRANSFUSAO = {{ tipos_com_hemotransfusao | tojson }};
+
+  function toggleDadosHemotransfusao() {
+    const exige = TIPOS_COM_HEMOTRANSFUSAO.includes(document.getElementById('tipo_ocorrencia').value);
+    document.getElementById('secao-hemotransfusao').hidden = !exige;
+    // Um radio obrigatório em cada grupo basta para o navegador exigir a resposta do grupo.
+    document.querySelectorAll('.campo-hemo').forEach(function (campo) {
+      campo.required = exige;
+      if (!exige) {
+        campo.checked = false;
+      }
+    });
+    if (!exige) {
+      document.querySelectorAll('input[name="hemo_hemocomponente"]').forEach(function (campo) { campo.checked = false; });
+      document.getElementById('hemo_hemocomponente_erro').textContent = '';
+    }
+  }
+
+  // Hemotransfusão e medicação sempre envolvem paciente: marca "Sim" e bloqueia o "Não".
+  const TIPOS_EXIGEM_PACIENTE = {{ tipos_exigem_paciente | tojson }};
+
+  function exigirPacienteSeNecessario() {
+    const exige = TIPOS_EXIGEM_PACIENTE.includes(document.getElementById('tipo_ocorrencia').value);
+    const pacienteSim = document.getElementById('envolve_paciente_sim');
+    document.getElementById('envolve_paciente_nao').disabled = exige;
+    document.getElementById('aviso-paciente-obrigatorio').hidden = !exige;
+    if (exige && !pacienteSim.checked) {
+      pacienteSim.checked = true;
+      toggleGrauDano();
+    }
+  }
+
+  // Seção de biovigilância: aparece para os tipos de ocorrência ligados a ela (ex.: Material biológico).
+  const TIPOS_COM_BIOVIGILANCIA = {{ tipos_com_biovigilancia | tojson }};
+
+  function toggleDadosBiovigilancia() {
+    const exige = TIPOS_COM_BIOVIGILANCIA.includes(document.getElementById('tipo_ocorrencia').value);
+    document.getElementById('secao-biovigilancia').hidden = !exige;
+    document.querySelectorAll('.campo-bio').forEach(function (campo) {
+      campo.required = exige;
+      if (!exige) {
+        campo.checked = false;
+      }
+    });
+  }
+
+  // Seção de medicação: o incidente (farmacovigilância) só é perguntado quando houve dano ao paciente.
+  const TIPOS_COM_MEDICACAO = {{ tipos_com_medicacao | tojson }};
+  const GRAU_SEM_DANO = {{ grau_sem_dano | tojson }};
+
+  function toggleDadosMedicacao() {
+    const exige = TIPOS_COM_MEDICACAO.includes(document.getElementById('tipo_ocorrencia').value);
+    document.getElementById('secao-medicacao').hidden = !exige;
+    document.querySelectorAll('.campo-med').forEach(function (campo) {
+      campo.required = exige;
+      if (!exige) {
+        campo.value = '';
+      }
+    });
+    atualizarIncidenteMedicacao();
+  }
+
+  function atualizarIncidenteMedicacao() {
+    const grau = document.querySelector('input[name="grau_dano"]:checked');
+    const mostrar = !document.getElementById('secao-medicacao').hidden && !!grau && grau.value !== GRAU_SEM_DANO;
+    document.getElementById('campo-med-incidente').hidden = !mostrar;
+    document.querySelectorAll('input[name="med_incidente"]').forEach(function (opcao) {
+      opcao.required = mostrar;
+      if (!mostrar) {
+        opcao.checked = false;
+      }
+    });
+  }
+
+  document.querySelectorAll('input[name="grau_dano"]').forEach(function (opcao) {
+    opcao.addEventListener('change', atualizarIncidenteMedicacao);
+  });
+
+  // Hemocomponente aceita várias opções; ao menos uma é obrigatória (o navegador não valida grupos de checkbox).
+  document.querySelector('form[action="{{ url_for('main.index') }}"]').addEventListener('submit', function (evento) {
+    if (document.getElementById('secao-hemotransfusao').hidden) {
+      return;
+    }
+    const aviso = document.getElementById('hemo_hemocomponente_erro');
+    if (!document.querySelector('input[name="hemo_hemocomponente"]:checked')) {
+      evento.preventDefault();
+      aviso.textContent = 'Selecione ao menos um tipo de hemocomponente.';
+      document.getElementById('hemo_hemocomponente_1').focus();
+    } else {
+      aviso.textContent = '';
+    }
+  });
+
+  // Autocompletar do nome do produto (banco de materiais). Nomes repetidos aparecem com o cód. SEPLAG.
+  const URL_BUSCA_PRODUTOS = '{{ url_for("main.buscar_material_produtos") }}';
+  let sugestoesProduto = [];
+  let seplagDaSugestao = false;
+  let buscaProdutoTimer = null;
+  let buscaProdutoControle = null;
+
+  function textoSugestao(item) {
+    return item.cod_seplag ? item.nome + ' · Cód. SEPLAG ' + item.cod_seplag : item.nome;
+  }
+
+  function limparSugestoesProduto() {
+    sugestoesProduto = [];
+    document.getElementById('produto_nome_sugestoes').innerHTML = '';
+    document.getElementById('produto_estoque_id').value = '';
+  }
+
+  // Liga o nome digitado/escolhido a um produto do estoque, se coincidir com uma sugestão.
+  function vincularProdutoEscolhido() {
+    const campo = document.getElementById('produto_nome');
+    const seplag = document.getElementById('produto_cod_seplag');
+    const valor = campo.value.trim();
+    let item = sugestoesProduto.find(function (s) { return textoSugestao(s) === valor; });
+    if (!item) {
+      const mesmosNomes = sugestoesProduto.filter(function (s) { return s.nome.toUpperCase() === valor.toUpperCase(); });
+      item = mesmosNomes.length === 1 ? mesmosNomes[0] : null;
+    }
+    if (item) {
+      campo.value = item.nome;
+      document.getElementById('produto_estoque_id').value = item.id;
+      if (item.cod_seplag && !seplag.readOnly) {
+        seplag.value = item.cod_seplag;
+        seplagDaSugestao = true;
+      }
+      return true;
+    }
+    document.getElementById('produto_estoque_id').value = '';
+    if (seplagDaSugestao && !seplag.readOnly) {
+      seplag.value = '';
+    }
+    seplagDaSugestao = false;
+    return false;
+  }
+
+  function buscarProdutos(termo) {
+    if (buscaProdutoControle) {
+      buscaProdutoControle.abort();
+    }
+    buscaProdutoControle = new AbortController();
+    fetch(URL_BUSCA_PRODUTOS + '?nome=' + encodeURIComponent(termo), { signal: buscaProdutoControle.signal })
+      .then(function (resposta) { return resposta.json(); })
+      .then(function (dados) {
+        sugestoesProduto = dados.resultados || [];
+        const lista = document.getElementById('produto_nome_sugestoes');
+        lista.innerHTML = '';
+        sugestoesProduto.forEach(function (item) {
+          const opcao = document.createElement('option');
+          opcao.value = textoSugestao(item);
+          lista.appendChild(opcao);
+        });
+      })
+      .catch(function () { /* sem sugestões: o nome continua sendo digitado */ });
+  }
+
+  document.getElementById('produto_nome').addEventListener('input', function () {
+    if (!CONSULTA_MATERIAIS_CONFIGURADA || this.readOnly) {
+      return;
+    }
+    if (vincularProdutoEscolhido()) {
+      return;  // escolheu uma sugestão da lista
+    }
+    clearTimeout(buscaProdutoTimer);
+    const termo = this.value.trim();
+    if (termo.length < 3) {
+      document.getElementById('produto_nome_sugestoes').innerHTML = '';
+      return;
+    }
+    buscaProdutoTimer = setTimeout(function () { buscarProdutos(termo); }, 300);
+  });
+
+  // Busca do produto pelo lote no banco de materiais (lote.lotefornecedor).
+  const CONSULTA_MATERIAIS_CONFIGURADA = {{ consulta_materiais_configurada | tojson }};
+  const URL_BUSCA_LOTE = '{{ url_for("main.buscar_material_lote") }}';
+  let statusLote = '';
+  let lotesEncontrados = [];
+  let buscaLoteTimer = null;
+  let buscaLoteControle = null;
+
+  function definirStatusLote(status, mensagem, cor) {
+    statusLote = status;
+    const aviso = document.getElementById('produto_lote_status');
+    aviso.textContent = mensagem;
+    aviso.style.color = cor || '#67757c';
+  }
+
+  // Nome do produto, fornecedor, cód. SEPLAG e validade vêm do estoque e ficam travados quando um lote é escolhido.
+  function travarDadosEstoque() {
+    document.querySelectorAll('.dado-estoque').forEach(function (campo) {
+      campo.readOnly = true;
+      campo.tabIndex = -1;
+    });
+  }
+
+  function liberarDadosEstoque() {
+    const estavaTravado = document.getElementById('produto_nome').readOnly;
+    document.querySelectorAll('.dado-estoque').forEach(function (campo) {
+      campo.readOnly = false;
+      campo.tabIndex = 0;
+      if (estavaTravado) {
+        campo.value = '';
+      }
+    });
+    document.getElementById('produto_lote_estoque_id').value = '';
+  }
+
+  function ocultarResultadosLote() {
+    lotesEncontrados = [];
+    document.getElementById('campo-lote-resultados').hidden = true;
+    const lista = document.getElementById('produto_lote_resultado');
+    lista.innerHTML = '';
+    lista.required = false;
+  }
+
+  function aplicarLote(registro) {
+    document.getElementById('produto_nome').value = registro.produto;
+    document.getElementById('produto_fornecedor').value = registro.fornecedor;
+    document.getElementById('produto_cod_seplag').value = registro.cod_seplag;
+    document.getElementById('produto_validade').value = registro.validade;
+    document.getElementById('produto_lote_estoque_id').value = registro.id;
+    limparSugestoesProduto();
+    seplagDaSugestao = false;
+    travarDadosEstoque();
+    if (!registro.cod_seplag) {
+      // Produto sem codigoreferencia no estoque: o cód. SEPLAG pode ser digitado.
+      const seplag = document.getElementById('produto_cod_seplag');
+      seplag.readOnly = false;
+      seplag.tabIndex = 0;
+    }
+  }
+
+  function descreverLote(registro) {
+    return registro.produto + ' — ' + (registro.fornecedor || 'fornecedor não informado')
+      + (registro.validade_br ? ' — validade ' + registro.validade_br : '');
+  }
+
+  function mostrarResultadosLote(resultados, limitado) {
+    const lista = document.getElementById('produto_lote_resultado');
+    lista.innerHTML = '';
+    lista.add(new Option('Selecione o produto deste lote', ''));
+    resultados.forEach(function (registro) {
+      lista.add(new Option(descreverLote(registro), registro.id));
+    });
+    lista.add(new Option('Nenhum destes (preencher manualmente)', 'manual'));
+    lista.required = true;
+    document.getElementById('campo-lote-resultados').hidden = false;
+    definirStatusLote('escolher',
+      resultados.length + ' produtos com este lote' + (limitado ? ' (mostrando os mais recentes)' : '') + '. Selecione abaixo.');
+  }
+
+  function buscarLote() {
+    const valor = document.getElementById('produto_lote').value.trim();
+    if (buscaLoteControle) {
+      buscaLoteControle.abort();
+    }
+    if (!valor) {
+      definirStatusLote('', '');
+      return;
+    }
+    definirStatusLote('buscando', 'Buscando produto no estoque...');
+    buscaLoteControle = new AbortController();
+    fetch(URL_BUSCA_LOTE + '?lote=' + encodeURIComponent(valor), { signal: buscaLoteControle.signal })
+      .then(function (resposta) { return resposta.json(); })
+      .then(function (dados) {
+        if (dados.status === 'encontrado') {
+          lotesEncontrados = dados.resultados;
+          if (lotesEncontrados.length === 1) {
+            aplicarLote(lotesEncontrados[0]);
+            definirStatusLote('encontrado', 'Produto encontrado no estoque.', '#0F9688');
+          } else {
+            mostrarResultadosLote(lotesEncontrados, dados.limitado);
+          }
+        } else {
+          // Não encontrado, inválido, limite de consultas ou banco indisponível: preenchimento manual
+          // (dados de material não são pessoais; a notificação não deve ficar bloqueada).
+          definirStatusLote('manual', dados.mensagem, '#b26b00');
+        }
+      })
+      .catch(function (erro) {
+        if (erro.name !== 'AbortError') {
+          definirStatusLote('manual', 'Não foi possível consultar o estoque agora. Preencha os dados do produto.', '#b26b00');
+        }
+      });
+  }
+
+  document.getElementById('produto_lote').addEventListener('input', function () {
+    if (!CONSULTA_MATERIAIS_CONFIGURADA) {
+      return;  // sem banco de materiais: dados do produto digitados
+    }
+    liberarDadosEstoque();
+    ocultarResultadosLote();
+    clearTimeout(buscaLoteTimer);
+    buscaLoteTimer = setTimeout(buscarLote, 700);
+  });
+
+  document.getElementById('produto_lote_resultado').addEventListener('change', function () {
+    liberarDadosEstoque();
+    if (this.value === 'manual') {
+      definirStatusLote('manual', 'Preencha os dados do produto.', '#b26b00');
+      return;
+    }
+    const registro = lotesEncontrados.find(function (r) { return String(r.id) === this.value; }, this);
+    if (registro) {
+      aplicarLote(registro);
+      definirStatusLote('encontrado', 'Produto selecionado do estoque.', '#0F9688');
+    } else {
+      definirStatusLote('escolher', 'Selecione o produto deste lote.');
+    }
+  });
+
+  // Fabricação não pode ser futura; validade não pode ser anterior à fabricação.
+  document.getElementById('produto_data_fabricacao').max = new Date().toISOString().slice(0, 10);
+  document.getElementById('produto_data_fabricacao').addEventListener('change', function () {
+    document.getElementById('produto_validade').min = this.value;
+  });
+
+  document.querySelector('form[action="{{ url_for('main.index') }}"]').addEventListener('submit', function (evento) {
+    if (document.getElementById('secao-produto').hidden) {
+      return;
+    }
+    if (statusLote === 'buscando') {
+      evento.preventDefault();
+      definirStatusLote('buscando', 'Aguarde a busca do lote terminar.', '#b26b00');
+      return;
+    }
+    const algumaAmostra = document.querySelector('input[name="envio_amostra"]:checked');
+    const aviso = document.getElementById('envio_amostra_erro');
+    if (!algumaAmostra) {
+      evento.preventDefault();
+      aviso.textContent = 'Selecione como a amostra do produto será enviada.';
+      document.getElementById('envio_amostra_1').focus();
+    } else {
+      aviso.textContent = '';
+    }
+  });
+
+  // Fecha a janela de informações ao clicar fora dela (no fundo escurecido).
+  document.getElementById('info-tipos-notificacao').addEventListener('click', function (evento) {
+    if (evento.target === this) {
+      this.close();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', toggleIdentificacao);
+  document.addEventListener('DOMContentLoaded', toggleGrauDano);
+  document.addEventListener('DOMContentLoaded', toggleDadosProduto);
+  document.addEventListener('DOMContentLoaded', toggleDadosHemotransfusao);
+  document.addEventListener('DOMContentLoaded', toggleDadosMedicacao);
+  document.addEventListener('DOMContentLoaded', toggleDadosBiovigilancia);
+  document.addEventListener('DOMContentLoaded', exigirPacienteSeNecessario);
+
+  // Telefone: bloqueia qualquer tecla que não seja dígito e limita a 11 caracteres
+  document.getElementById('notificante_telefone').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 11);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Editar Usuário{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Editar Usuário</h2>
+    <p>Atualize perfil, senha e setores permitidos</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <h3 style="margin-top:0; color:var(--green-dark);">{{ usuario.full_name }}</h3>
+    <form method="POST" action="{{ url_for('main.editar_usuario', user_id=usuario.id) }}" data-transition="false">
+      <div class="form-grid">
+        <div class="field">
+          <label for="full_name">Nome Completo *</label>
+          <input type="text" id="full_name" name="full_name" value="{{ usuario.full_name }}" required>
+        </div>
+        <div class="field">
+          <label for="username">Usuário (login) *</label>
+          <input type="text" id="username" name="username" value="{{ usuario.username }}" required>
+        </div>
+        <div class="field">
+          <label for="password">Nova Senha</label>
+          <input type="password" id="password" name="password" placeholder="Deixe em branco para manter a atual">
+        </div>
+        <div class="field">
+          <label for="perfil_id">Perfil de Acesso *</label>
+          <select id="perfil_id" name="perfil_id" required>
+            {% for perfil in perfis %}
+              <option value="{{ perfil.id }}" {% if usuario.perfil_id == perfil.id %}selected{% endif %}>{{ perfil.nome }}{% if perfil.acesso_total %} (acesso total){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field full">
+          <label>Setores Permitidos *</label>
+          <div class="checkbox-grid">
+            {% for setor in setores %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="setor_ids" value="{{ setor.id }}" {% if setor in usuario.setores %}checked{% endif %}>
+                <span>{{ setor.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Perfis com acesso total não precisam de setores vinculados.</small>
+        </div>
+        <div class="field full">
+          <label>Categorias Profissionais Permitidas *</label>
+          <div class="checkbox-grid">
+            {% for categoria in categorias_profissionais %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="categoria_ids" value="{{ categoria.id }}" {% if categoria in usuario.categorias_profissionais %}checked{% endif %}>
+                <span>{{ categoria.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Perfis com acesso total não precisam de categorias vinculadas.</small>
+        </div>
+        <div class="field full">
+          <label>Tipos de Ocorrência Permitidos *</label>
+          <div class="checkbox-grid">
+            {% for tipo in tipos_ocorrencia %}
+              <label class="checkbox-card">
+                <input type="checkbox" name="tipo_ocorrencia_ids" value="{{ tipo.id }}" {% if tipo in usuario.tipos_ocorrencia %}checked{% endif %}>
+                <span>{{ tipo.nome }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <small style="color:#67757c;">Perfis com acesso total enxergam todos os tipos de ocorrência.</small>
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

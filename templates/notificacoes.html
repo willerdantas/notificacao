@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Conferir Notificações{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="title">
+    <h2>Conferir Notificações</h2>
+    <p>Visualize todas as não conformidades notificadas</p>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" action="{{ url_for('main.notificacoes') }}" style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; width:100%;">
+    <div class="field">
+      <label>Status</label>
+      <select name="status">
+        <option value="">Todos</option>
+        {% for s in status_options %}
+          <option value="{{ s }}" {% if status_filtro == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Setor Notificador</label>
+      <select name="setor_notificador">
+        <option value="">Todos</option>
+        {% for s in setores %}
+          <option value="{{ s }}" {% if setor_filtro == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Setor Responsável</label>
+      <select name="responsavel_id">
+        <option value="">Todos</option>
+        {% for r in responsaveis %}
+          <option value="{{ r.id }}" {% if responsavel_filtro == (r.id|string) %}selected{% endif %}>{{ r.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    <a href="{{ url_for('main.notificacoes') }}" class="btn btn-outline" style="padding:12px 20px;">Limpar</a>
+  </form>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <div class="notificacoes-summary">
+      <div class="summary-item"><span>Total</span><strong>{{ notificacoes|length }}</strong></div>
+      <div class="summary-item"><span>Filtros ativos</span><strong>{{ 'Sim' if status_filtro or setor_filtro or responsavel_filtro else 'Não' }}</strong></div>
+    </div>
+
+    <div class="table-scroll-wrap">
+    <table class="table-notificacoes">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Unidade</th>
+          <th>Tipo de Notificação</th>
+          <th>Setor Notificador</th>
+          <th>Setor Responsável</th>
+          <th>Local do Evento</th>
+          <th>Categoria</th>
+          <th>Tipo</th>
+          <th>Gravidade</th>
+          <th>Data</th>
+          <th>Horário</th>
+          <th>Status</th>
+          <th>ANVISA</th>
+          <th>Imagem</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in notificacoes %}
+        <tr>
+          <td>{{ n.id }}</td>
+          <td>{{ n.unidade_hospitalar }}</td>
+          <td>{{ n.tipo_notificacao }}</td>
+          <td>{{ n.setor_notificador }}</td>
+          <td>{{ n.responsavel.nome if n.responsavel else '-' }}</td>
+          <td>{{ n.local_evento }}</td>
+          <td>{{ n.categoria_profissional }}</td>
+          <td>{{ n.tipo_ocorrencia }}</td>
+          <td>
+            {% if n.gravidade == 'Alta' %}
+              <span class="badge badge-alta">Alta</span>
+            {% elif n.gravidade == 'Média' %}
+              <span class="badge badge-media">Média</span>
+            {% else %}
+              <span class="badge badge-baixa">Baixa</span>
+            {% endif %}
+          </td>
+          <td>{{ n.data_ocorrencia.strftime('%d/%m/%Y') }}</td>
+          <td>{{ n.horario_notificacao.strftime('%H:%M') }}</td>
+          <td>
+            {% if n.status == 'Pendente' %}
+              <span class="badge badge-pendente">Pendente</span>
+            {% elif n.status == 'Em Análise' %}
+              <span class="badge badge-em-analise">Em Análise</span>
+            {% else %}
+              <span class="badge badge-resolvida">Resolvida</span>
+            {% endif %}
+          </td>
+          <td>{{ n.status_anvisa or 'Não Notificado' }}</td>
+          <td>
+            {% if n.imagem_path %}
+              <a href="{{ url_for('static', filename=n.imagem_path) }}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:6px 14px; font-size:0.8rem;">Ver</a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('main.visualizar_notificacao', notification_id=n.id) }}" class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;">Visualizar</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="15">Nenhuma notificação encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

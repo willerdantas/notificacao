@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Menu | Sistema de Notificação{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1>MENU PRINCIPAL</h1>
+  <p style="margin-top:-16px; opacity:0.9;">
+    Bem-vindo(a), {{ current_user.full_name }} &middot; Perfil: {{ current_user.perfil.nome if current_user.perfil else 'sem perfil' }}
+  </p>
+</div>
+
+<div class="container">
+  <div class="card-grid">
+    {# Páginas liberadas no perfil do usuário (tela Perfis de Acesso). #}
+    {% for card in cards %}
+    <a href="{{ card.url }}" class="menu-card">
+      <div>
+        <span class="icon">{{ card.icone }}</span>
+        {{ card.titulo }}
+      </div>
+    </a>
+    {% else %}
+    <p style="color:#67757c;">Nenhuma página liberada para o seu perfil. Procure o administrador do sistema.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
