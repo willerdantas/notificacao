@@ -20,9 +20,13 @@
 
 * { box-sizing: border-box; }
 
+/* Campos e botões não herdam a fonte da página por padrão. */
+body, button, input, select, textarea {
+  font-family: Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
   color: var(--dark);
   background: var(--gray-light);
 }
@@ -134,7 +138,7 @@ a { text-decoration: none; color: inherit; }
   border-radius: 50%;
   background: transparent;
   color: var(--white);
-  font: italic 700 1.05rem/1 Georgia, 'Times New Roman', serif;
+  font: italic 700 1.05rem/1 Arial, sans-serif;
   letter-spacing: 0;
   cursor: pointer;
   display: inline-flex;

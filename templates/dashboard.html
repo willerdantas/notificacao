@@ -114,6 +114,9 @@
 
       const paleta = ['#00A1A2', '#3BB5A3', '#00B2C9', '#007C6B', '#EB600A', '#F3A133', '#2E758C', '#0F9688', '#F7975B', '#53B7D9'];
 
+      // Os gráficos são desenhados em canvas e não usam a fonte do CSS.
+      Chart.defaults.font.family = 'Arial, sans-serif';
+
       new Chart(document.getElementById('chartMes'), {
         type: 'bar',
         data: {
