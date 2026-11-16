@@ -87,11 +87,19 @@ TESTE_AVISO = "aviso"
 TESTE_ERRO = "erro"
 
 
-def testar_conexao(dados):
-    """Testa a conexão PostgreSQL e a existência do schema.
+# Tabelas consultadas pelo sistema em cada banco externo. Os nomes são fixos; o schema
+# onde elas ficam é o configurado na tela (campo Schema).
+TABELAS_ESPERADAS = {
+    "banco_pacientes": ("t_paciente", "t_clinica"),
+    "banco_materiais": ("lote", "produto", "fornecedor", "pessoa", "pessoajuridica"),
+}
+
+
+def testar_conexao(dados, tabelas=()):
+    """Testa a conexão PostgreSQL, a existência do schema e, se informadas, das tabelas nele.
 
     Retorna (status, mensagem), com status TESTE_OK, TESTE_AVISO (conectou, mas o
-    schema não existe) ou TESTE_ERRO.
+    schema ou alguma tabela não existe) ou TESTE_ERRO.
     """
     if not banco_configurado(dados):
         return TESTE_ERRO, "Preencha endereço, banco e usuário."
@@ -126,9 +134,25 @@ def testar_conexao(dados):
                 (schema,),
             )
             schema_existe = cursor.fetchone() is not None
+            faltando = []
+            if schema_existe and tabelas:
+                cursor.execute(
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema = %s AND table_name = ANY(%s)",
+                    (schema, list(tabelas)),
+                )
+                existentes = {linha[0] for linha in cursor.fetchall()}
+                faltando = [t for t in tabelas if t not in existentes]
     finally:
         conexao.close()
 
+    banco = dados["database"]
     if not schema_existe:
-        return TESTE_AVISO, f"Conexão OK ({versao}), mas o schema '{schema}' não existe."
+        return TESTE_AVISO, f"Conexão OK ({versao}), mas o schema '{schema}' não existe no banco '{banco}'."
+    if faltando:
+        return TESTE_AVISO, (
+            f"Conexão OK ({versao}), mas o schema '{schema}' do banco '{banco}' não tem: {', '.join(faltando)}. "
+            "Confira o banco de dados e o schema."
+        )
+    if tabelas:
+        return TESTE_OK, f"Conexão OK ({versao}). Tabelas encontradas no schema '{schema}' do banco '{banco}'."
     return TESTE_OK, f"Conexão OK ({versao}). Schema '{schema}' encontrado."

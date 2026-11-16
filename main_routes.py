@@ -13,7 +13,9 @@ from config_store import (
     CAMPOS_BANCO,
     LOGO_PRINCIPAL_PADRAO,
     LOGO_TRANSICAO_PADRAO,
+    TABELAS_ESPERADAS,
     TESTE_AVISO,
+    TESTE_OK,
     banco_configurado,
     carregar_configuracao,
     salvar_configuracao,
@@ -1528,7 +1530,7 @@ def configuracoes():
             bancos[secao] = dados
 
             if operacao == "testar":
-                status, mensagem = testar_conexao(dados)
+                status, mensagem = testar_conexao(dados, TABELAS_ESPERADAS.get(secao, ()))
                 if status == TESTE_AVISO and secao == "banco_notificacoes":
                     mensagem += " Ele será criado ao clicar em Salvar."
                 resultados_teste[secao] = {"status": status, "mensagem": mensagem}
@@ -1552,6 +1554,11 @@ def configuracoes():
                 config[secao] = dados
                 salvar_configuracao(config)
                 flash(f"{SECOES_BANCO[secao]}: configuração salva.", "success")
+                if secao in TABELAS_ESPERADAS:
+                    # Salva mesmo assim (o servidor pode estar fora do ar agora), mas avisa.
+                    status, mensagem = testar_conexao(dados, TABELAS_ESPERADAS[secao])
+                    if status != TESTE_OK:
+                        flash(f"Atenção: {mensagem}", "warning")
 
                 if secao == "banco_notificacoes":
                     app = current_app._get_current_object()
